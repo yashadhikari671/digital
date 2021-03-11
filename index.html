@@ -1,12 +1,24 @@
 <html>
   <head>
     <title>lab manual</title>
+<style>
+      body {
+        text-align:left ;
+      }
+      h1 {
+        color: #000000;
+      }
+      div {
+        white-space: pre;
+      }
+    </style>
   </head>
   <body>
-    <h1>1.	GENERATION OF BASIC SIGNALS</h1>
     <div>
-      %BASIC SIGNAL GENERATION <br>
-      % Generation of Unit Impulse, Step, and Ramp Sequences<br>
+    <h1>1.	GENERATION OF BASIC SIGNALS</h1>
+    
+      %BASIC SIGNAL GENERATION 
+      % Generation of Unit Impulse, Step, and Ramp Sequences
       clc;
       clear;
       close all;
@@ -61,6 +73,586 @@
       xlabel('t(seconds)');
       ylabel('Amplitude');
       title('Exponential Sequence Generation');
+
+      <h1>2   DETERMINE THE ADDITION OF TWO SINUSOIDAL SIGNALS</h1>
+
+        clc;
+        clear all;
+        close all;
+        Fs = 1000;                    % Sampling frequency
+        T = 1/Fs;                     % Sample time
+        L = 200;                     % Length of signal
+        t = (0:L-1)*T;                % Time vector
+        % Sum of a 50 Hz sinusoid and a 120 Hz sinusoid
+        x1 = 2*sin(2*pi*100*t);
+        x2 = sin(2*pi*120*t);
+        x = x1 + x2;
+        NFFT = 2^nextpow2(L); % Next power of 2 from length of y
+        Y = fft(x,NFFT)/L;
+        f = Fs/2*linspace(0,1,NFFT/2+1);
+        % Plot single-sided amplitude spectrum.
+        subplot(411)
+        plot(t,x1);
+        subplot(412)
+        plot(t,x2);
+        subplot(413)
+        plot(t,x);
+        subplot(414)
+        plot(f,2*abs(Y(1:NFFT/2+1))) 
+        title('Single-Sided Amplitude Spectrum of y(t)')
+        xlabel('Frequency (Hz)')
+        ylabel('|Y(f)|')
+
+      
+      <h1>3	The Discrete Fourier Transform (DFT) and Inverse Discrete Fourier Transform (IDFT) of a given discrete signal.</h1>
+      
+      clc;
+      clear all;
+      close all;
+      N = input('Number of DFT points = ');
+      xn = input('Enter the sequence xn = '); 
+       %Get the sequence from user 
+      ln = length(xn);       %find the length of the sequence
+      xn = [xn zeros(1,N-ln)];
+      xk = zeros(1,N);  %initialize an array of same size as that of input sequence
+      ixk = zeros(1,N); %initialize an array of same size as that of input sequence
+      %code block to find the DFT of the sequence
+      for k = 0:N-1
+      for n = 0:N-1
+      xk(k+1) = xk(k+1)+(xn(n+1)*exp((-1i)*2*pi*k*n/N));
+      end
+      end
+      %code block to plot the input sequence
+      t = 0:N-1;
+      subplot(2,2,1);
+      stem(t,xn);
+      ylabel('Amplitude ---->');
+      xlabel('n ---->');
+      title('Input Sequence ---->');
+      grid on;
+      magnitude = abs(xk); %Find the magnitudes of individual DFT points
+      disp('DFT Sequence = ');
+      disp(magnitude);
+      %code block to plot the DFT sequence
+      t = 0:N-1;
+      subplot(2,2,2);
+      stem(t,magnitude);
+      xlabel('K ---->');
+      ylabel('Amplitude ---->');
+      title('DFT Sequence ---->');
+      grid on;
+      phase = angle(xk); %Find the phases of individual DFT points
+      disp('Phase = ');
+      disp(phase);
+       %code block to plot the Phase Response
+      t = 0:N-1;
+      subplot(2,2,3);
+      stem(t,phase);
+      ylabel('Phase ---->');
+      xlabel('K ---->');
+      title('Phase Response'); grid on;
+      % Code block to find the IDFT of the sequence
+      for n = 0:N-1
+      for k = 0:N-1
+      ixk(n+1) = ixk(n+1)+(xk(k+1)*exp(1i*2*pi*k*n/N));
+      end
+      end
+      ixk = ixk./N;
+      %code block to plot the IDFT sequence
+      t = 0:N-1;
+      subplot(2,2,4);
+      stem(t,ixk);
+      disp('IDFT Sequence = ');
+      disp(ixk);
+      ylabel('Amplitude ---->');
+      xlabel('n ---->');
+      title('IDFT sequence ---->'); grid on;
+      
+      
+      <h1>4.	Obtain frequency response of IIR Low Pass and High pass Butterworth filter</h1>
+      
+      <h3> low pass  BILINEAR TRANSFORMATION METHOD</h3>
+      
+      
+      clc;
+      clear all;  close all;
+      wp = 0.5*pi; % digital passband frequency in Hz (normalized)
+      ws = 0.75*pi; % digital stopband frequency in Hz (normalized)
+      Rp=20*log10(1/sqrt(2)); % passband ripple in dB
+      Rp=-Rp;
+      As = 20*log10(0.2); % stopband attenuation in dB As=-As;
+      % Analog Prototype Specifications: 
+      Fs = 1; T = 1/Fs;
+      OmegaP = (2/T)*tan(wp/2); % prewarp prototype passband frequency 
+      OmegaS = (2/T)*tan(ws/2); % prewarp prototype stopband frequency
+      % Analog butterworth Prototype Filter Calculation: 
+      [n omegac]=buttord(OmegaP, OmegaS, Rp, As,'s');
+      [c d] = butter(n,omegac,'s');
+      % Bilinear Transformation: 
+      [b, a] = bilinear(c, d, Fs);
+      [h db] = freqz(b,a); plot(db/pi,20*log10(abs(h))); axis ([0 1 -20 1]) ;
+      grid;
+      xlabel('frequency (Hz)'); ylabel('decibels'); title('Magnitude in dB');
+      
+      <h3>)low pass IMPULSE INVARIANCE METHOD </h3>
+      
+      
+      clc;
+      clear all; close all;
+      wp = 0.5*pi; % digital passband frequency in Hz (normalized)
+      ws = 0.75*pi; % digital stopband frequency in Hz (normalized)
+      Rp=20*log10(1/sqrt(2)); % passband ripple in dB
+      Rp=-Rp;
+      As = 20*log10(0.2); % stopband attenuation in dB As=-As;
+      % Analog Prototype Specifications: 
+      Fs = 1; T = 1/Fs;
+      OmegaP = wp/T; % prewarp prototype passband frequency 
+      OmegaS = ws/T; % prewarp prototype stopband frequency
+      % Analog butterworth Prototype Filter Calculation: 
+      [n omegac]=buttord(OmegaP, OmegaS, Rp, As,'s');
+      [c d] = butter(n,omegac,'s');
+      % Impulse invariant Transformation: 
+      [b, a] = impinvar(c, d, Fs);
+      [h db] = freqz(b,a); plot(db/pi,20*log10(abs(h))); axis ([0 1 -20 1]) ;
+      grid;
+      xlabel('frequency (Hz)'); ylabel('Magnitude in dB'); title('IMPULSE INVARIANT  METHOD ');
+      
+      
+      
+      <h3>high pass BILINEAR TRANSFORMATION METHOD</h3>
+      
+      
+      clc;
+      clear all; 
+      close all;
+      wp = 0.75*pi; % digital passband frequency in Hz (normalized) 
+      ws = 0.5*pi; % digital stopband frequency in Hz (normalized)
+      Rp=20*log10(1/sqrt(2)); % passband ripple in dB
+      Rp=-Rp;
+      As = 20*log10(0.2); % stopband attenuation in dB 
+      As=-As;
+      % Analog Prototype Specifications: 
+      Fs = 1;
+      T = 1/Fs;
+      OmegaP = (2/T)*tan(wp/2); % prewarp prototype passband frequency 
+      OmegaS = (2/T)*tan(ws/2); % prewarp prototype stopband frequency
+      % Analog butterworth Prototype Filter Calculation: 
+      [n omegac]=buttord(OmegaP, OmegaS, Rp, As,'s'); [c d] = butter(n,omegac,'high','s');
+      % Bilinear Transformation: 
+      [b, a] = bilinear(c, d, Fs);
+      [h db] = freqz(b,a); plot(db/pi,20*log10(abs(h))); axis([0 1 -20 1])
+      grid
+      xlabel('frequency (Hz)'); 
+      ylabel('Magnitude in dB'); 
+      title('BILINEAR  TRANSFORMATION METHOD ');
+      
+      <h3> high pass IMPULSE INVARIANCE METHOD </h3>
+      
+      clc;
+      clear all; 
+      close all;
+      wp = 0.75*pi; % digital passband frequency in Hz (normalized) 
+      ws = 0.5*pi; % digital stopband frequency in Hz (normalized)
+      Rp=20*log10(1/sqrt(2)); % passband ripple in dB
+      Rp=-Rp;
+      As = 20*log10(0.2); % stopband attenuation in dB 
+      As=-As;
+      % Analog Prototype Specifications: 
+      Fs = 1;
+      T = 1/Fs;
+      OmegaP = wp/T; % prewarp prototype passband frequency 
+      OmegaS = ws/T; % prewarp prototype stopband frequency
+      % Analog butterworth Prototype Filter Calculation: 
+      [n omegac]=buttord(OmegaP, OmegaS, Rp, As,'s'); 
+      [c d] = butter(n,omegac,'high','s');
+      % Impulse invariant Transformation: 
+      [b, a] = impinvar(c, d, Fs);
+      [h db] = freqz(b,a); plot(db/pi,20*log10(abs(h))); 
+      grid
+      xlabel('frequency (Hz)'); ylabel('Magnitude in dB'); title('IMPULSE INVARIANT  METHOD ');
+      
+      
+      
+      <h1>5.	Obtain frequency response of IIR Low Pass and High pass Chebyshev filter</h1>
+      
+      <h3>low pass BILINEAR TRANSFORMATION METHOD</h3>
+      
+      clc; 
+      clear all; 
+      close all;
+      wp = 0.5*pi;  % digital passband frequency in Hz (normalized) 
+      ws = 0.75*pi;  % digital stopband frequency in Hz (normalized)
+      Rp=20*log10(1/sqrt(2)); % passband ripple in dB
+      Rp=-Rp;
+      As = 20*log10(0.2); % stopband attenuation in dB 
+      As=-As;
+      % Analog Prototype Specifications: 
+      Fs = 1;
+      T = 1/Fs;
+      OmegaP = (2/T)*tan(wp/2); % prewarp prototype passband frequency 
+      OmegaS = (2/T)*tan(ws/2); % prewarp prototype stopband frequency
+      % Analog butterworth Prototype Filter Calculation: 
+       [n omegac]=cheb1ord(OmegaP, OmegaS, Rp, As,'s'); 
+      [c d] = cheby1(n,Rp, omegac,'low','s');
+      % Bilinear Transformation: 
+      [b, a] = bilinear(c, d, Fs);
+      [h db] = freqz(b,a); plot(db/pi,20*log10(abs(h))); 
+      xlabel('frequency (Hz)'); 
+      ylabel('Magnitude in dB'); 
+      title('BILINEAR  TRANSFORMATION METHOD ');
+      
+      <h3>low pass IMPULSE INVARIANCE METHOD </h3>
+      
+      clc; clear all; close all;
+      ws = 0.75*pi; % digital passband frequency in Hz (normalized) 
+      wp = 0.5*pi; % digital stopband frequency in Hz (normalized)
+      Rp=20*log10(1/sqrt(2)); % passband ripple in dB
+      Rp=-Rp;
+      As = 20*log10(0.2); % stopband attenuation in dB 
+      As=-As;
+      % Analog Prototype Specifications: 
+      Fs = 1;
+      T = 1/Fs;
+      OmegaP = wp/T; % prewarp prototype passband frequency 
+      OmegaS = ws/T; % prewarp prototype stopband frequency
+      % Analog butterworth Prototype Filter Calculation: 
+       [n omegac]=cheb1ord(OmegaP, OmegaS, Rp, As,'s'); 
+      [c d] = cheby1(n,Rp, omegac,'low','s');
+      % Impulse invariant Transformation: 
+       [b, a] = impinvar(c, d, Fs);
+      [h db] = freqz(b,a); plot(db/pi,20*log10(abs(h))); 
+      grid
+      xlabel('frequency (Hz)'); ylabel('Magnitude in dB'); title('IMPULSE INVARIANT  METHOD ');
+      
+      <h3>high pass BILINEAR TRANSFORMATION METHOD</h3>
+      
+      clc; clear all; close all;
+      wp = 0.75*pi; % digital passband frequency in Hz (normalized) 
+      ws = 0.5*pi; % digital stopband frequency in Hz (normalized)
+      Rp=20*log10(1/sqrt(2)); % passband ripple in dB
+      Rp=-Rp;
+      As = 20*log10(0.2); % stopband attenuation in dB 
+      As=-As;
+      % Analog Prototype Specifications: 
+      Fs = 1;
+      T = 1/Fs;
+      OmegaP = (2/T)*tan(wp/2); % prewarp prototype passband frequency 
+      OmegaS = (2/T)*tan(ws/2); % prewarp prototype stopband frequency
+      % Analog butterworth Prototype Filter Calculation: 
+       [n omegac]=cheb1ord(OmegaP, OmegaS, Rp, As,'s'); 
+      [c d] = cheby1(n,Rp, omegac,'high','s');
+      % Bilinear Transformation: 
+      [b, a] = bilinear(c, d, Fs);
+      [h db] = freqz(b,a); plot(db/pi,20*log10(abs(h))); 
+      grid
+      xlabel('frequency (Hz)');
+      ylabel('Magnitude in dB'); 
+      title('BILINEAR  TRANSFORMATION METHOD ');
+      
+      
+      
+      <h3>high pass IMPULSE INVARIENCE METHOD </h3>
+      
+      clc; clear all; close all;
+      wp = 0.75*pi; % digital passband frequency in Hz (normalized) 
+      ws = 0.5*pi; % digital stopband frequency in Hz (normalized)
+      Rp=20*log10(1/sqrt(2)); % passband ripple in dB
+      Rp=-Rp;
+      As = 20*log10(0.2); % stopband attenuation in dB 
+      As=-As;
+      % Analog Prototype Specifications: 
+      Fs = 1;
+      T = 1/Fs;
+      OmegaP = wp/T; % prewarp prototype passband frequency 
+      OmegaS = ws/T; % prewarp prototype stopband frequency
+      % Analog butterworth Prototype Filter Calculation: 
+       [n omegac]=cheb1ord(OmegaP, OmegaS, Rp, As,'s'); 
+      [c d] = cheby1(n,Rp, omegac,'high','s');
+      % Impulse invariant Transformation: 
+       [b, a] = impinvar(c, d, Fs);
+      [h db] = freqz(b,a); plot(db/pi,20*log10(abs(h))); 
+      grid
+      xlabel('frequency (Hz)');
+       ylabel('Magnitude in dB'); 
+      title('IMPULSE INVARIANT  METHOD ');
+      
+      
+      
+      <h1>6.	Obtain frequency response of FIR Low Pass and High pass Chebyshev filter</h1>
+      
+      
+      clc; 
+      clear all; 
+      close all; 
+      rp=0.04; 
+      rs=0.02;
+      fp=1500; 
+      fs=2000; 
+      f=8000;
+      wp=2*fp/f; 
+      ws=2*fs/f; 
+      % MATLAB PROGRAM FOR FIR FILTERS USING RECTANGULAR WINDOW:
+      num=-20*log10(sqrt(rp*rs))-13; 
+      dem=14.6*(fs-fp)/f; n=ceil(num/dem);
+      n1=n+1;
+      if (rem(n,2)~=0)
+          n1=n;
+      n=n-1; 
+      end
+      y=boxcar(n1); b=fir1(n,wp,y);
+      [h,o]=freqz(b,1,256);
+      m=20*log10(abs(h)); 
+      plot(o/pi,m);
+       ylabel('Gain in dB -->');
+      xlabel('Normalised frequency');
+      title('RECTANGULAR WINDOW ');
+      figure;
+      
+      % MATLAB PROGRAM FOR FIR FILTERS USING TRIANGULAR WINDOW:
+      y=triang(n1); 
+      b=fir1(n,wp,y);
+      [h,o]=freqz(b,1,256); m=20*log10(abs(h)); 
+      plot(o/pi,m); 
+      ylabel('Gain in dB -->');
+      xlabel('Normalised frequency');
+      title('TRIANGULAR WINDOW ');
+      figure;
+      % MATLAB PROGRAM FOR FIR FILTERS USING KAISER WINDOW:
+      beta=5.8; 
+      y=kaiser(n1,beta);
+      b=fir1(n,wp,y); 
+      [h,o]=freqz(b,1,256);
+      m=20*log10(abs(h)); 
+      plot(o/pi,m); 
+      ylabel('Gain in dB -->');
+      xlabel('Normalised frequency');
+      title('KAISER WINDOW ');
+
+      
+      
+      
+      <h1>7.  To generate the Histogram and Histogram Equalization of a digital image </h1>
+      
+      clc;
+      clear;
+      close all;
+      I=imread('cameraman.tif');
+      I = double(I);
+      [m,n] = size(I);
+      L = 0:255;
+      C = zeros(1,256);
+      for i = 1:256
+      for j = 1:256
+      for k = 1:256
+      if I(i,j) == L(k)
+      C(k) = C(k) + 1;
+      end
+      end
+      end
+      end
+      c_prob = C/(m*n);
+      cc_prob = cumsum(c_prob);
+      out_int = zeros(1,256);
+      for i = 1:256
+      out_int(i) = floor(((cc_prob(i) - min(cc_prob))/(1 - min(cc_prob)))*255 + 0.5);
+      end
+      I_out = zeros(m,n);
+      for i = 1:m
+      for j = 1:n
+      I_out(i,j) = out_int(I(i,j));
+      end
+      end
+      subplot(131);imshow(uint8(I));title('original image');
+      subplot(132);imshow(uint8(I_out));title('histogram equalized image');
+      K = imread('cameraman.tif');K1=histeq(K);
+      subplot(133);imshow(K1);title('matlab generated');
+      figure, imhist(K);title('histogram of original image');
+      figure, imhist(K1);title('histogram of histogram equalized image');
+      
+      
+      
+      <h1>8.	To verify the normalized cross correlation to the addition of noise and removal of noise using filters to an image</h1>
+      
+      
+      % Matlab program for image smoothing
+        clc;
+        clear;
+        close all;
+        a = imread('cameraman.tif');
+        b = im2double(a);
+        c = imnoise(b,'salt & pepper');
+        psnr_noise= psnr(b,c);
+        [m,n] = size(b);
+        d_max = zeros(m,n);
+        d_min = zeros(m,n);
+        d_median = zeros(m,n);
+        for i = 2:m-1
+         for j = 2:n-1
+         d_max(i,j) = max(max(c(i-1:i+1,j-1:j+1)));
+         d_min(i,j) = min(min(c(i-1:i+1,j-1:j+1)));
+         d_median(i,j) = median(median(c(i-1:i+1,j-1:j+1)));
+         end
+        end
+        subplot(221); imshow(c);title('noisy image');
+         subplot(222); imshow(d_max );title(' max filtered output ');
+         subplot(223); imshow( d_min );title(' min filtered output ');
+         subplot(224); imshow( d_median);title(' median filtered output');
+        CR_c_d_max = corr2(c,d_max)
+        CR_c_d_min = corr2(c,d_min)
+        CR_c_d_median = corr2(c,d_median)
+        psnr_median = psnr(b,d_median);
+        psnr_max = psnr(b,d_max);
+        psnr_min = psnr(b,d_min);
+        psnr_noise
+        psnr_median
+        psnr_max
+        psnr_min
+
+      
+      <h3> Compute the edge of an image using Linear spatial filters</h3>
+      
+      % Edge of an image using roberts Operator
+      % Gx = Gradient in X-Direction = [+1 0 ; 0 -1]
+      % Gy = Gradient in Y-Direction = [0 +1 ; -1 0]
+      clc;
+      clear;
+      close all;
+      A = imread('testpat1.png');
+      % A = imread('rice.png');
+      A = im2double(A);
+      [m,n] = size(A);
+      Gx = zeros(m,n);
+      Gy = zeros(m,n);
+      G = zeros(m,n);
+      for i = 2:(m-1)
+       for j = 2:(n-1)
+       Gx(i,j) = (A(i-1,j-1) - A(i,j));
+       Gy(i,j) = (A(i-1,j) - A(i,j-1));
+       G(i,j) = sqrt(Gx(i,j).^2 + Gy(i,j).^2);
+       end
+      end
+      figure, 
+      imshow([Gx Gy G]); 
+      title('Gradient in X-Direction     Gradient in Y-Direction      Edge Detected Image');
+      
+      
+      
+      % Edge of an image using Prewitt Operator
+      % Gx = Gradient in X-Direction = [-1 0 1; -1 0 1;-1 0 1]
+      % Gy = Gradient in Y-Direction = [-1 -1 -1 ;0 0 0; 1 1 1]
+
+      % A = imread('rice.png');
+      % A = im2double(A);
+      % [m,n] = size(A);
+      Gx = zeros(m,n);
+      Gy = zeros(m,n);
+      G = zeros(m,n);
+      for i = 2:(m-1)
+          for j = 2:(n-1)
+              Gx(i,j) = (A(i-1,j+1) + A(i,j+1) + A(i+1,j+1)) - (A(i-1,j-1) + A(i,j-1) + A(i+1,j-1));
+              Gy(i,j) = -(A(i-1,j-1) + A(i-1,j) + A(i-1,j+1)) + (A(i+1,j-1) + A(i+1,j) + A(i+1,j+1));
+              G(i,j) = sqrt(Gx(i,j).^2 + Gy(i,j).^2);
+          end
+      end
+      figure, 
+      imshow([Gx Gy G]); 
+      title('Gradient in X-Direction     Gradient in Y-Direction      Edge Detected Image');
+      
+      
+      
+      % Edge of an image using sobel Operator
+      % Gx = Gradient in X-Direction = [-1 0 1; -2 0 2;-1 0 1]
+      % Gy = Gradient in Y-Direction = [-1 -2 -1 ;0 0 0;1 2 1]
+
+      % A = imread('rice.png');
+      % A = im2double(A);
+      % [m,n] = size(A);
+      Gx = zeros(m,n);
+      Gy = zeros(m,n);
+      G = zeros(m,n);
+      for i = 2:(m-1)
+          for j = 2:(n-1)
+              Gx(i,j) = (A(i-1,j+1) + 2*A(i,j+1) + A(i+1,j+1)) - (A(i-1,j-1) + 2*A(i,j-1) + A(i+1,j-1));
+              Gy(i,j) = -(A(i-1,j-1) + 2*A(i-1,j) + A(i-1,j+1)) + (A(i+1,j-1) + 2*A(i+1,j) + A(i+1,j+1));
+              G(i,j) = sqrt(Gx(i,j).^2 + Gy(i,j).^2);
+          end
+      end
+      figure, 
+      imshow([Gx Gy G]); 
+      title('Gradient in X-Direction     Gradient in Y-Direction      Edge Detected Image');
+      
+      
+      
+      % Edge of an image using laplacian
+      % laplacian kernel : [0 -1 0;-1 4 -1;0 -1 0] without diagonals
+      % laplacian kernel : [-1 -1 -1;-1 8 -1;-1 -1 -1] with diagonals
+      % clc;
+      % clear;
+      % close all;
+      % A = imread('testpat1.png');
+      % A = im2double(A);
+      % [m,n] = size(A);
+      G1 = zeros(m,n);
+      G2 = zeros(m,n);
+      G = zeros(m,n);
+      for i = 2:(m-1)
+          for j = 2:(n-1)
+              G1(i,j) = 4*A(i,j) - (A(i-1,j) + A(i+1,j) + A(i,j-1) + A(i,j+1));
+              G2(i,j) = 8*A(i,j) - (A(i-1,j) + A(i+1,j) + A(i,j-1) + A(i,j+1) + A(i-1,j-1) + A(i+1,j-1) + A(i-1,j+1) + A(i+1,j+1));
+
+          end
+      end
+      figure, 
+      imshow([G1 G2]); 
+      title('Laplacian without Diagonals      Laplacian with Diagonals');
+
+
+      
+      
+      
+      <h1>9.	Perform the image motion blur and calculate PSNR of original and degraded image</h1>
+      
+      clc;
+      clear;
+      close all;
+      %matlab program for debluring a motion blurred image using wiener filter
+      I = im2double(imread('cameraman.tif'));
+      % Simulate a Motion blur
+      % defining the width of blurred pixels
+      LEN = 20;
+      % defining the angle of blur
+      THETA = 10;
+      PSF = fspecial('motion', LEN, THETA);
+      blurred = imfilter(I, PSF, 'conv', 'circular');
+      %restoring the blurred image using wiener filter
+      wnr1 = deconvwnr(blurred, PSF, 0);
+      imshow([I blurred wnr1]);
+      title('original image motion blurred deblurred using wiener filter');
+      psnr_blur1= psnr(I, blurred)
+
+
+
+
+
+
+      
+      
+
+
+
+      
+      
+
+
+
+
+
+
+
+
+
+	
+
 
     </div>
     
