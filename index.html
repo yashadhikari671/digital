@@ -3,6 +3,66 @@
     <title>lab manual</title>
   </head>
   <body>
-    Well come to manual
+    <h1>1.	GENERATION OF BASIC SIGNALS</h1>
+    <p>
+      %BASIC SIGNAL GENERATION
+      % Generation of Unit Impulse, Step, and Ramp Sequences
+      clc;
+      clear;
+      close all;
+      %Generation of Unit Impulse Sequence
+      t = -5:5;
+      [m,n] = size(t);
+      Imp = zeros(m,n);
+      Step = zeros(m,n);
+      Ramp = zeros(m,n);
+      for i = 1:n
+          if t(i) == 0
+              Imp(i) = 1;
+          else
+              Imp(i) = 0;
+          end 
+      %Generation of Unit Step Sequence
+          if t(i) >= 0
+              Step(i) = 1;
+          else
+              Step(i) = 0;
+          end 
+      %Generation of Ramp Sequence
+          if t(i) >= 0 
+              Ramp(i) = t(i);
+          else
+         Ramp(i) = 0;
+      end
+      end
+      subplot(131);stem(t,Imp); xlabel(' Time');ylabel('Amplitude');title('Unit impulse Sequence ');
+      subplot(132);stem(t,Step); xlabel(' Time');ylabel('Amplitude');title('Unit Step Sequence ');
+      subplot(133);stem(t,Ramp); xlabel(' Time');ylabel('Amplitude');title('Unit Ramp Sequence ');
+      % Generation of Sinusoidal Sequence
+      clc;
+      clear all;
+      close all;
+      t=0:0.2:10;
+      y=sin(2*pi*t/5);
+      figure;
+      stem(t,y);
+      xlabel(' Time');
+      ylabel('Amplitude');
+      title('Sine Wave Sequence ');
+      % Generation of Exponential Sequence
+      clc;
+      clear all;
+      close all;
+      a = input('Enter the value of a \n');
+      t = -1:1/10:2;
+      expo = exp(a*t);
+      figure(5);
+      stem(t,expo,'linewidth',1);
+      xlabel('t(seconds)');
+      ylabel('Amplitude');
+      title('Exponential Sequence Generation');
+
+
+    </P>
   </body>
 </html>
